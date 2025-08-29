@@ -31,27 +31,35 @@ const Dashboard = ({ user, onNavigate }: DashboardProps) => {
   const pillars = [
     {
       id: 'pilar1',
-      title: 'Manual de Processos',
+      title: 'Pilar 1: Protagonismo',
+      subtitle: 'Manual de Processos',
       description: 'Documente e organize todos os seus processos internos',
       status: progress.pilar1,
+      icon: '⚡',
     },
     {
       id: 'pilar2', 
-      title: 'Manual de Atendimento',
+      title: 'Pilar 2: Inteligência Aplicada',
+      subtitle: 'Manual de Atendimento',
       description: 'Sistematize o atendimento aos seus clientes',
       status: progress.pilar2,
+      icon: '🧠',
     },
     {
       id: 'pilar3',
-      title: 'Manual de Vendas',
+      title: 'Pilar 3: Arquitetura de Autonomia',
+      subtitle: 'Manual de Vendas',
       description: 'Estruture seu processo comercial do lead ao fechamento',
       status: progress.pilar3,
+      icon: '🏗️',
     },
     {
       id: 'pilar4',
-      title: 'Manual de Conteúdo',
+      title: 'Pilar 4: Marca Visionária',
+      subtitle: 'Manual de Conteúdo',
       description: 'Crie um sistema para produção de conteúdo consistente',
       status: progress.pilar4,
+      icon: '🚀',
     },
   ];
 
@@ -100,19 +108,25 @@ const Dashboard = ({ user, onNavigate }: DashboardProps) => {
       <div className="grid md:grid-cols-2 gap-6">
         {pillars.map((pillar) => (
           <Card key={pillar.id} className="bg-card border-border hover:border-brand-highlight/50 transition-colors">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg text-left">{pillar.title}</CardTitle>
-                <div className={`w-3 h-3 rounded-full ${getStatusColor(pillar.status)}`} />
+            <CardContent className="p-6">
+              <div className="flex items-center mb-4">
+                <div className={`w-12 h-12 rounded-full ${getStatusColor(pillar.status)} flex items-center justify-center text-2xl mr-4`}>
+                  {pillar.status === 'completed' ? '✓' : 
+                   pillar.status === 'in_progress' ? '...' : pillar.icon}
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-lg font-bold text-white mb-1">{pillar.title}</h4>
+                  <p className="text-sm font-medium text-brand-highlight">{pillar.subtitle}</p>
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="text-left">
+              
               <p className="text-sm text-muted-foreground mb-4">
                 {pillar.description}
               </p>
+              
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">
-                  {getStatusText(pillar.status)}
+                  Status: {getStatusText(pillar.status)}
                 </span>
                 {pillar.status === 'not_started' && (
                   <Button

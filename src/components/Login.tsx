@@ -10,10 +10,38 @@ interface LoginProps {
 }
 
 const USERS = [
-  { id: 1, email: 'joyce@engenheiras.com', name: 'Joyce', password: 'liberdade2025', isAdmin: true },
-  { id: 2, email: 'jaqueline@cliente.com', name: 'Jaqueline', password: 'password123', isAdmin: false },
-  { id: 3, email: 'ana@cliente.com', name: 'Ana', password: 'password123', isAdmin: false },
-  { id: 4, email: 'beatriz@cliente.com', name: 'Beatriz', password: 'password123', isAdmin: false },
+  { 
+    id: 1, 
+    email: 'joyce@engenheiras.com', 
+    name: 'Joyce', 
+    password: 'liberdade2025', 
+    isAdmin: true,
+    progress: { pilar1: 'completed', pilar2: 'completed', pilar3: 'in_progress', pilar4: 'not_started' }
+  },
+  { 
+    id: 2, 
+    email: 'jaqueline@cliente.com', 
+    name: 'Jaqueline', 
+    password: 'password123', 
+    isAdmin: false,
+    progress: { pilar1: 'completed', pilar2: 'in_progress', pilar3: 'not_started', pilar4: 'not_started' }
+  },
+  { 
+    id: 3, 
+    email: 'ana@cliente.com', 
+    name: 'Ana', 
+    password: 'password123', 
+    isAdmin: false,
+    progress: { pilar1: 'completed', pilar2: 'completed', pilar3: 'completed', pilar4: 'completed' }
+  },
+  { 
+    id: 4, 
+    email: 'beatriz@cliente.com', 
+    name: 'Beatriz', 
+    password: 'password123', 
+    isAdmin: false,
+    progress: { pilar1: 'completed', pilar2: 'completed', pilar3: 'completed', pilar4: 'in_progress' }
+  },
 ];
 
 const Login = ({ onLogin }: LoginProps) => {

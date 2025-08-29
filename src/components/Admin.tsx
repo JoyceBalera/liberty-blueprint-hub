@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import KpiChart from "@/components/KpiChart";
 
 const Admin = () => {
   const { toast } = useToast();
 
-  // Mock data
-  const [kpis] = useState({
+  // Mock data that updates
+  const [kpis, setKpis] = useState({
     totalUsers: 4,
     totalBlueprints: 6,
     totalPosts: 2
@@ -23,9 +24,9 @@ const Admin = () => {
     { id: 2, title: 'Análise Contra-Guru', type: 'prompt', content: 'Prompt estratégico...' }
   ]);
 
-  const [labTools, setLabTools] = useState([
-    { id: 1, title: 'Criadora de Prompts', description: 'IA para criar prompts estratégicos', placeholder: 'Descreva seu objetivo...' },
-    { id: 2, title: 'A Negociadora', description: 'IA para scripts de negociação', placeholder: 'Insira o cenário...' }
+  const [labTools, setLabTools] = useState<Array<{id: string, title: string, description: string, placeholder: string}>>([
+    { id: 'prompt-creator', title: 'Criadora de Prompts', description: 'IA para criar prompts estratégicos', placeholder: 'Descreva seu objetivo...' },
+    { id: 'negotiator', title: 'A Negociadora', description: 'IA para scripts de negociação', placeholder: 'Insira o cenário...' }
   ]);
 
   const [users] = useState([
@@ -59,8 +60,13 @@ const Admin = () => {
       id: blueprints.length + 1,
       ...blueprintForm
     };
-    setBlueprints([...blueprints, newBlueprint]);
+    const updatedBlueprints = [...blueprints, newBlueprint];
+    setBlueprints(updatedBlueprints);
     setBlueprintForm({ title: '', content: '', type: 'gpt' });
+    
+    // Update KPI
+    setKpis(prev => ({ ...prev, totalBlueprints: updatedBlueprints.length }));
+    
     toast({
       title: "Blueprint adicionado!",
       description: "O novo blueprint foi salvo na biblioteca.",
@@ -70,10 +76,15 @@ const Admin = () => {
   const handleLabToolSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newTool = {
-      id: labTools.length + 1,
+      id: `${labToolForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
       ...labToolForm
     };
-    setLabTools([...labTools, newTool]);
+    const updatedTools = [...labTools, newTool];
+    setLabTools(updatedTools);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('labTools', JSON.stringify(updatedTools));
+    
     setLabToolForm({ title: '', description: '', placeholder: '' });
     toast({
       title: "IA do Lab adicionada!",
@@ -91,15 +102,25 @@ const Admin = () => {
   };
 
   const handleDeleteBlueprint = (id: number) => {
-    setBlueprints(blueprints.filter(b => b.id !== id));
+    const updatedBlueprints = blueprints.filter(b => b.id !== id);
+    setBlueprints(updatedBlueprints);
+    
+    // Update KPI
+    setKpis(prev => ({ ...prev, totalBlueprints: updatedBlueprints.length }));
+    
     toast({
       title: "Blueprint removido",
       description: "O blueprint foi removido da biblioteca.",
     });
   };
 
-  const handleDeleteLabTool = (id: number) => {
-    setLabTools(labTools.filter(t => t.id !== id));
+  const handleDeleteLabTool = (id: string) => {
+    const updatedTools = labTools.filter(t => t.id !== id);
+    setLabTools(updatedTools);
+    
+    // Update localStorage
+    localStorage.setItem('labTools', JSON.stringify(updatedTools));
+    
     toast({
       title: "IA removida",
       description: "A ferramenta foi removida do laboratório.",
@@ -150,6 +171,7 @@ const Admin = () => {
               </CardContent>
             </Card>
           </div>
+          <KpiChart />
         </TabsContent>
 
         <TabsContent value="blueprints">
@@ -273,7 +295,10 @@ const Admin = () => {
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
                   {labTools.map(tool => (
                     <div key={tool.id} className="flex justify-between items-center bg-muted p-2 rounded">
-                      <span className="text-sm">{tool.title}</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{tool.title}</div>
+                        <div className="text-xs text-muted-foreground">{tool.description}</div>
+                      </div>
                       <Button
                         onClick={() => handleDeleteLabTool(tool.id)}
                         variant="destructive"

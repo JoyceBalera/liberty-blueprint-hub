@@ -13,8 +13,9 @@ const Ranking = () => {
   const calculatePoints = (progress: any) => {
     let points = 0;
     Object.values(progress).forEach((status: any) => {
-      if (status === 'completed') points += 25;
-      else if (status === 'in_progress') points += 10;
+      if (status === 'completed') points += 100;
+      else if (status === 'in_progress') points += 50;
+      else points += 0; // not_started
     });
     return points;
   };
@@ -101,7 +102,7 @@ const Ranking = () => {
 
       <div className="mt-8 text-sm text-muted-foreground">
         <p>
-          <strong>Sistema de Pontuação:</strong> 25 pontos por pilar concluído • 10 pontos por pilar em progresso
+          <strong>Sistema de Pontuação:</strong> 100 pontos por pilar concluído • 50 pontos por pilar em progresso
         </p>
       </div>
     </div>

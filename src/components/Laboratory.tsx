@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,22 +8,34 @@ const Laboratory = () => {
   const [activeTools, setActiveTools] = useState<{[key: string]: boolean}>({});
   const [toolInputs, setToolInputs] = useState<{[key: string]: string}>({});
   const [toolResults, setToolResults] = useState<{[key: string]: string}>({});
+  const [labTools, setLabTools] = useState<Array<{id: string, title: string, description: string, placeholder: string}>>([]);
   const { toast } = useToast();
 
-  const labTools = [
-    {
-      id: 'prompt-creator',
-      title: 'Criadora de Prompts',
-      description: 'Descreva seu objetivo e nossa IA, treinada na metodologia da Engenharia da Liberdade, irá gerar um prompt estratégico para você.',
-      placeholder: 'Ex: Preciso de um prompt para analisar um concorrente...'
-    },
-    {
-      id: 'negotiator',
-      title: 'A Negociadora',
-      description: 'Insira um cenário de negociação ou uma objeção de cliente e nossa IA irá gerar scripts e contra-argumentos para te ajudar a fechar a venda.',
-      placeholder: 'Ex: O cliente disse "Está muito caro"...'
+  // Load lab tools from localStorage or use defaults
+  useEffect(() => {
+    const stored = localStorage.getItem('labTools');
+    const defaultTools = [
+      {
+        id: 'prompt-creator',
+        title: 'Criadora de Prompts',
+        description: 'Descreva seu objetivo e nossa IA, treinada na metodologia da Engenharia da Liberdade, irá gerar um prompt estratégico para você.',
+        placeholder: 'Ex: Preciso de um prompt para analisar um concorrente...'
+      },
+      {
+        id: 'negotiator',
+        title: 'A Negociadora',
+        description: 'Insira um cenário de negociação ou uma objeção de cliente e nossa IA irá gerar scripts e contra-argumentos para te ajudar a fechar a venda.',
+        placeholder: 'Ex: O cliente disse "Está muito caro"...'
+      }
+    ];
+    
+    if (stored) {
+      setLabTools(JSON.parse(stored));
+    } else {
+      setLabTools(defaultTools);
+      localStorage.setItem('labTools', JSON.stringify(defaultTools));
     }
-  ];
+  }, []);
 
   const handleToolSubmit = (toolId: string) => {
     const input = toolInputs[toolId];
@@ -36,11 +48,21 @@ const Laboratory = () => {
       let result = '';
       
       if (toolId === 'prompt-creator') {
-        result = `**PROMPT ESTRATÉGICO GERADO:**
+        result = `**Objetivo:** ${input}
 
-"Você é um especialista em [área específica baseada na entrada do usuário]. Sua missão é analisar o seguinte cenário e fornecer insights estratégicos baseados na metodologia da Engenharia da Liberdade.
+**[CONTEXTO]**
+Aja como uma especialista na metodologia "Engenharia da Liberdade".
 
-CONTEXTO: ${input}
+**[TAREFA]**
+Crie um prompt detalhado para o objetivo acima, incluindo seções como [OBJETIVO], [CONTEXTO], [PERSONA DA IA], [TAREFA] e [FORMATO DE SAÍDA].
+
+**[PROMPT GERADO]**
+
+"Você é um especialista em automação de negócios focado na metodologia da Engenharia da Liberdade.
+
+OBJETIVO: ${input}
+
+CONTEXTO: Preciso de uma solução que reduza minha dependência operacional e me permita focar no estratégico.
 
 INSTRUÇÕES:
 1. Identifique os pontos-chave que podem ser automatizados
@@ -54,23 +76,28 @@ FORMATO DE RESPOSTA:
 - Processos a documentar
 - Ações recomendadas"`;
       } else if (toolId === 'negotiator') {
-        result = `**SCRIPT DE NEGOCIAÇÃO:**
+        result = `**Cenário:** ${input}
 
-**OBJEÇÃO IDENTIFICADA:** "${input}"
+**[ANÁLISE]**
+A objeção "preço" raramente é sobre dinheiro. É sobre valor.
 
-**ESTRATÉGIA DE RESPOSTA:**
+**[SCRIPT]**
+1. **Valide:** "Eu entendo completamente sua preocupação."
+2. **Reforce o Diferencial:** "A solução do concorrente foca em [X]. O nosso foco é em [Y], que é o que realmente vai te dar [resultado]."
+3. **Pergunta de Implicação:** "Pensando a longo prazo, o que custa mais: o investimento agora ou continuar com o problema atual?"
 
-🎯 **Reconhecimento e Empatia:**
-"Entendo perfeitamente sua preocupação com o investimento. É natural querer ter certeza do valor antes de se comprometer."
+**[FECHAMENTO]**
+"Vamos fazer um teste: se em 30 dias você não sentir que recuperou o investimento em tempo poupado, devolvemos 100% do valor. O que acha?"`;
+      } else {
+        // Handle custom tools
+        result = `Resultado gerado para: ${input}
 
-💡 **Reframe de Valor:**
-"Deixe-me reformular a questão: qual é o custo de continuar fazendo tudo manualmente? Quantas horas por semana você gasta em tarefas que poderiam ser automatizadas?"
+Esta é uma resposta personalizada baseada na ferramenta "${labTools.find(t => t.id === toolId)?.title}".
 
-📊 **Quebra de Valor:**
-"Vamos fazer uma conta rápida: se você economizar apenas 5 horas por semana, quanto isso vale em tempo livre ou capacidade de atender mais clientes?"
-
-🔒 **Fechamento:**
-"O investimento se paga em [X] semanas. Depois disso, é lucro puro em tempo e qualidade de vida. Podemos começar na próxima semana?"`;
+Análise completa:
+- Ponto identificado: ${input}
+- Recomendação estratégica baseada na Engenharia da Liberdade
+- Próximos passos sugeridos para implementação`;
       }
 
       setToolResults({...toolResults, [toolId]: result});
