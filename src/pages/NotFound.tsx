@@ -1,5 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,14 +14,24 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+      <Card className="max-w-md w-full bg-card border-border text-center">
+        <CardHeader>
+          <CardTitle className="text-6xl font-bold text-brand-highlight mb-4">404</CardTitle>
+          <h1 className="text-2xl font-bold text-white">Página não encontrada</h1>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-6">
+            A página que você está procurando não existe ou foi movida.
+          </p>
+          <Button 
+            asChild
+            className="bg-brand-highlight hover:opacity-90"
+          >
+            <a href="/">Voltar ao Hub</a>
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
