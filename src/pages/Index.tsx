@@ -24,7 +24,7 @@ interface User {
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState('progresso');
+  const [activeTab, setActiveTab] = useState('diagnostico');
 
   const handleLogin = (userData: User) => {
     setUser(userData);

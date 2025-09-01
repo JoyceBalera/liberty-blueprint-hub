@@ -110,54 +110,54 @@ const Diagnostic = () => {
         Responda com sinceridade para mapear os gargalos que roubam seu tempo e sua paz.
       </p>
 
-      <Card className="bg-card border-border min-h-[400px] flex flex-col">
+      <Card className="bg-card/95 border-border/20 backdrop-blur-sm min-h-[500px] flex flex-col shadow-lg">
         <CardContent className="p-6 flex-grow flex flex-col">
           {!isStarted ? (
             <div className="flex-grow flex items-center justify-center">
               <Button 
                 onClick={handleStart}
-                className="bg-brand-highlight text-white font-bold py-3 px-8 rounded-full text-lg hover:opacity-90"
+                className="bg-gradient-to-r from-brand-highlight to-brand-accent1 text-white font-bold py-4 px-10 rounded-full text-lg hover:shadow-lg transition-all duration-300 hover:scale-105"
               >
                 Iniciar Diagnóstico
               </Button>
             </div>
           ) : (
             <div className="flex-grow flex flex-col">
-              <div className="flex-grow space-y-4 overflow-y-auto pr-2 text-left">
+              <div className="flex-grow space-y-4 overflow-y-auto pr-2 text-left max-h-[350px]">
                 {messages.map((message, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded-lg max-w-[85%] animate-in fade-in-0 slide-in-from-bottom-1 ${
+                    className={`p-4 rounded-xl max-w-[85%] animate-in fade-in-0 slide-in-from-bottom-1 shadow-sm ${
                       message.sender === 'ai' 
-                        ? 'bg-muted self-start' 
-                        : 'bg-brand-accent1 text-white self-end ml-auto'
+                        ? 'bg-background/80 border border-border/50 text-foreground self-start backdrop-blur-sm' 
+                        : 'bg-gradient-to-r from-brand-highlight to-brand-accent1 text-white self-end ml-auto'
                     }`}
                     dangerouslySetInnerHTML={{ __html: message.text }}
                   />
                 ))}
                 {showTyping && (
-                  <div className="p-3 rounded-lg bg-muted max-w-[85%]">
+                  <div className="p-4 rounded-xl bg-background/80 border border-border/50 max-w-[85%] backdrop-blur-sm">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      <div className="w-2 h-2 bg-brand-highlight rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-brand-highlight rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-brand-highlight rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                     </div>
                   </div>
                 )}
               </div>
               
               {isStarted && !isFinished && !showTyping && (
-                <div className="mt-6">
+                <div className="mt-6 border-t border-border/20 pt-4">
                   <Textarea
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
                     placeholder="Digite sua resposta..."
                     rows={3}
-                    className="mb-3"
+                    className="mb-3 bg-background/50 border-border/30 focus:border-brand-highlight/50 resize-none"
                   />
                   <Button 
                     onClick={handleNext}
-                    className="w-full bg-brand-highlight text-white font-semibold py-2.5 hover:opacity-90"
+                    className="w-full bg-gradient-to-r from-brand-highlight to-brand-accent1 text-white font-semibold py-3 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
                   >
                     Próxima Pergunta
                   </Button>

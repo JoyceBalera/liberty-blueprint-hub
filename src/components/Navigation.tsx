@@ -6,8 +6,8 @@ interface NavigationProps {
 
 const Navigation = ({ currentTab, onTabChange, isAdmin }: NavigationProps) => {
   const tabs = [
-    { id: 'progresso', label: 'Meu Progresso' },
     { id: 'diagnostico', label: 'Diagnóstico' },
+    { id: 'progresso', label: 'Meu Progresso' },
     { id: 'laboratorio', label: 'Laboratório' },
     { id: 'biblioteca', label: 'Biblioteca' },
     { id: 'comunidade', label: 'Comunidade' },
