@@ -20,8 +20,8 @@ const Admin = () => {
   });
 
   const [blueprints, setBlueprints] = useState([
-    { id: 1, title: 'Agente de Diagnóstico', type: 'gpt', content: 'Blueprint para diagnóstico...' },
-    { id: 2, title: 'Análise Contra-Guru', type: 'prompt', content: 'Prompt estratégico...' }
+    { id: 1, title: 'Agente de Diagnóstico', type: 'gpt', content: 'Blueprint para diagnóstico...', pdfs: [] as Array<{ name: string; url: string }> },
+    { id: 2, title: 'Análise Contra-Guru', type: 'prompt', content: 'Prompt estratégico...', pdfs: [] as Array<{ name: string; url: string }> }
   ]);
 
   const [labTools, setLabTools] = useState<Array<{id: string, title: string, description: string, placeholder: string}>>([
@@ -40,8 +40,10 @@ const Admin = () => {
   const [blueprintForm, setBlueprintForm] = useState({
     title: '',
     content: '',
-    type: 'gpt'
+    type: 'gpt',
+    pdfs: [] as Array<{ name: string; url: string }>,
   });
+  const [editingBlueprintId, setEditingBlueprintId] = useState<number | null>(null);
 
   const [labToolForm, setLabToolForm] = useState({
     title: '',
@@ -56,13 +58,26 @@ const Admin = () => {
 
   const handleBlueprintSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingBlueprintId !== null) {
+      const updated = blueprints.map(b =>
+        b.id === editingBlueprintId ? { ...b, ...blueprintForm } : b
+      );
+      setBlueprints(updated);
+      setEditingBlueprintId(null);
+      setBlueprintForm({ title: '', content: '', type: 'gpt', pdfs: [] as Array<{ name: string; url: string }> });
+      toast({
+        title: "Blueprint atualizado!",
+        description: "As alterações foram salvas.",
+      });
+      return;
+    }
     const newBlueprint = {
       id: blueprints.length + 1,
       ...blueprintForm
     };
     const updatedBlueprints = [...blueprints, newBlueprint];
     setBlueprints(updatedBlueprints);
-    setBlueprintForm({ title: '', content: '', type: 'gpt' });
+    setBlueprintForm({ title: '', content: '', type: 'gpt', pdfs: [] as Array<{ name: string; url: string }> });
     
     // Update KPI
     setKpis(prev => ({ ...prev, totalBlueprints: updatedBlueprints.length }));
@@ -71,6 +86,37 @@ const Admin = () => {
       title: "Blueprint adicionado!",
       description: "O novo blueprint foi salvo na biblioteca.",
     });
+  };
+
+  const handleEditBlueprint = (id: number) => {
+    const bp = blueprints.find(b => b.id === id);
+    if (!bp) return;
+    setEditingBlueprintId(id);
+    setBlueprintForm({
+      title: bp.title,
+      content: bp.content,
+      type: bp.type,
+      pdfs: bp.pdfs || [],
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingBlueprintId(null);
+    setBlueprintForm({ title: '', content: '', type: 'gpt', pdfs: [] as Array<{ name: string; url: string }> });
+  };
+
+  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const mapped = Array.from(files).map((file) => ({
+      name: file.name,
+      url: URL.createObjectURL(file),
+    }));
+    setBlueprintForm((prev) => ({
+      ...prev,
+      pdfs: [...(prev.pdfs || []), ...mapped],
+    }));
+    e.target.value = '';
   };
 
   const handleLabToolSubmit = (e: React.FormEvent) => {
@@ -104,6 +150,11 @@ const Admin = () => {
   const handleDeleteBlueprint = (id: number) => {
     const updatedBlueprints = blueprints.filter(b => b.id !== id);
     setBlueprints(updatedBlueprints);
+    
+    if (editingBlueprintId === id) {
+      setEditingBlueprintId(null);
+      setBlueprintForm({ title: '', content: '', type: 'gpt', pdfs: [] as Array<{ name: string; url: string }> });
+    }
     
     // Update KPI
     setKpis(prev => ({ ...prev, totalBlueprints: updatedBlueprints.length }));
@@ -178,7 +229,7 @@ const Admin = () => {
           <div className="grid md:grid-cols-2 gap-8">
             <Card>
               <CardHeader>
-                <CardTitle>Adicionar Blueprint</CardTitle>
+                <CardTitle>Adicionar Blueprint (GPTs ou GEMs)</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleBlueprintSubmit} className="space-y-4">
@@ -208,34 +259,84 @@ const Admin = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="gpt">Blueprint de GPT</SelectItem>
+                        <SelectItem value="gpt">Blueprint para GPT</SelectItem>
+                        <SelectItem value="gem">Blueprint para GEM (Gemini)</SelectItem>
                         <SelectItem value="prompt">Prompt Estratégico</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="submit" className="w-full bg-brand-highlight hover:opacity-90">
-                    Salvar Blueprint
-                  </Button>
+                  <div>
+                    <Label htmlFor="blueprint-pdfs">PDFs de Referência (opcional)</Label>
+                    <Input
+                      id="blueprint-pdfs"
+                      type="file"
+                      accept="application/pdf"
+                      multiple
+                      onChange={handlePdfUpload}
+                    />
+                    {blueprintForm.pdfs?.length ? (
+                      <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                        {blueprintForm.pdfs.map((f, idx) => (
+                          <li key={idx} className="flex items-center justify-between">
+                            <span className="truncate">{f.name}</span>
+                            <a href={f.url} target="_blank" rel="noopener noreferrer" className="underline">
+                              ver
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button type="submit" className="w-full bg-brand-highlight hover:opacity-90">
+                      {editingBlueprintId !== null ? 'Atualizar Blueprint' : 'Salvar Blueprint'}
+                    </Button>
+                    {editingBlueprintId !== null && (
+                      <Button type="button" variant="secondary" onClick={handleCancelEdit}>
+                        Cancelar
+                      </Button>
+                    )}
+                  </div>
                 </form>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Blueprints Existentes</CardTitle>
+                <CardTitle>Blueprints Existentes (GPTs e GEMs)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
                   {blueprints.map(blueprint => (
-                    <div key={blueprint.id} className="flex justify-between items-center bg-muted p-2 rounded">
-                      <span className="text-sm">{blueprint.title}</span>
-                      <Button
-                        onClick={() => handleDeleteBlueprint(blueprint.id)}
-                        variant="destructive"
-                        size="sm"
-                      >
-                        Remover
-                      </Button>
+                    <div key={blueprint.id} className="bg-muted p-3 rounded">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate">{blueprint.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {blueprint.type === 'gpt' ? 'GPT' : blueprint.type === 'gem' ? 'GEM (Gemini)' : 'Prompt Estratégico'}
+                            {blueprint.pdfs?.length ? ` • PDFs: ${blueprint.pdfs.length}` : ''}
+                          </div>
+                          {blueprint.pdfs?.length ? (
+                            <ul className="mt-2 space-y-1 text-xs">
+                              {blueprint.pdfs.map((f, idx) => (
+                                <li key={idx}>
+                                  <a href={f.url} target="_blank" rel="noopener noreferrer" className="underline">
+                                    {f.name}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Button size="sm" variant="secondary" onClick={() => handleEditBlueprint(blueprint.id)}>
+                            Editar
+                          </Button>
+                          <Button onClick={() => handleDeleteBlueprint(blueprint.id)} variant="destructive" size="sm">
+                            Remover
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
